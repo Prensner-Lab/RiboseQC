@@ -75,36 +75,36 @@
 #' 
 #' @export
 
-create_html_report <- function(input_files, input_sample_names, output_file,extended=F){
-    
+create_html_report <- function(input_files, input_sample_names, output_file, extended=FALSE) {
+
     # get input and output file paths
     input_files <- paste(normalizePath(dirname(input_files)),basename(input_files),sep="/")
     output_file <- paste(normalizePath(dirname(output_file)),basename(output_file),sep="/")
-    
+
     # get path to RMarkdown file (to be rendered)
-    rmd_path <- paste(system.file(package="RiboseQC"),"/rmd/riboseqc_template.Rmd",sep="")
+    rmd_path <- paste(system.file(package="RiboseQC",mustWork = TRUE),"/rmd/riboseqc_template.Rmd",sep="")
     if(extended){
-        rmd_path <- paste(system.file(package="RiboseQC"),"/rmd/riboseqc_template_full.Rmd",sep="")
+        rmd_path <- paste(system.file(package="RiboseQC",mustWork = TRUE),"/rmd/riboseqc_template_full.Rmd",sep="")
     }
-    
+
     # get folder path for pdf figures
     output_fig_path <- paste(output_file,"_plots/", sep = "")
-    
+
     # create folder for rds ojects and pdf figures
     dir.create(paste0(output_fig_path, "rds/"), recursive=TRUE, showWarnings=FALSE)
     dir.create(paste0(output_fig_path, "pdf/"), recursive=TRUE, showWarnings=FALSE)
     sink(file = paste(output_file,"_report_text_output.txt",sep = ""))
     # render RMarkdown file > html report
     knitclean<-knitr::knit_meta(class=NULL, clean = TRUE)
-    suppressWarnings(render(rmd_path, 
+    suppressWarnings(render(rmd_path,
            params = list(input_files = input_files,
                          input_sample_names = input_sample_names,
                          output_fig_path = output_fig_path),
-           output_file = output_file))
+           output_file = output_file,
+           intermediates_dir = tempdir()))
     gici<-gc()
     sink()
 }
-
 
 #' Generate PDF files from RDS object files
 #'
